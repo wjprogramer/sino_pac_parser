@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import {getInputFolderPath} from "@src/utils/fs";
-import {PdfFile} from "@src/types";
+import {PdfFile, PdfPageData} from "@src/types";
 import path from "path";
 import pdfParse from "pdf-parse";
 import {execSync} from "child_process";
@@ -31,20 +31,39 @@ export const decryptPdf = (options: {
 export const parsePdf = async (pdfFile: PdfFile, options?: {
     password?: string,
 }) => {
-    const pageDataList: any[] = [];
+    const pageDataList: PdfPageData[] = [];
 
     const rawBuffer = fs.readFileSync(pdfFile.completeAddress);
-    await pdfParse(rawBuffer, {
+    const parsePdfResult = await pdfParse(rawBuffer, {
         pagerender: (pageData) => {
             pageDataList.push(pageData);
             return pageData;
         },
     });
 
-    for (const pageData of pageDataList) {
-        console.log();
-        console.log(pageData);
-        console.log();
+    console.log(parsePdfResult.info);
+
+    for (const pageData of [pageDataList[0]]) {
+        //
+        /**
+         * 參考: pdf-parse/ 搜尋keyword: getTextContent
+         *
+         * # MessageHandler
+         *
+         * 用法:
+         * MessageHandler(...).sendWithStream('GetTextContent');
+         *
+         * streamTextContent
+         *
+         * var readableStream = this.streamTextContent(params);
+         */
+
+        // console.log(pageData.transport.pdfDocument.pdfInfo);
+        // console.log(pageData.objs.objs);
+        console.log(pageData.transport.messageHandler);
+
+        pageData.transport.messageHandler.on('Get');
+
     }
 
 }

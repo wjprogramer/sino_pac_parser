@@ -3,6 +3,9 @@
 ## Env
 
 ```
+$ qpdf --version
+qpdf version 11.5.0
+
 $ nvm version
 1.1.11
 
