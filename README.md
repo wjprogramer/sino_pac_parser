@@ -33,3 +33,20 @@ tsc --init
 yarn
 yarn start
 ```
+
+## `pdf-parse` Notes
+
+```js
+// 目前永豐測試到的都是使用 pdf-parse v1.10.100
+// 搜尋
+textContent.items.push(runBidiTransform(textContentItem));
+
+// 搜尋此行
+// str: normalizeWhitespace ? replaceWhitespace(bidiResult.str) : bidiResult.str,
+// 取代成
+str: `/fuck/${str}`,
+```
+
+
+
+
