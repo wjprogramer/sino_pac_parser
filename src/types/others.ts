@@ -4,6 +4,7 @@ export type PdfFile = {
     fileName: string,
     completeAddress: string,
     parent: string,
+    baseName: string,
 }
 
 export type PdfParseResult = {

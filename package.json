@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/index.ts",
+    "start:main_server": "ts-node -r tsconfig-paths/register src/index.ts main_server",
+    "start:parse_pdf": "ts-node -r tsconfig-paths/register src/index.ts parse_pdf",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@manojadams/node-qpdf2": "^5.1.1",
     "dotenv": "^16.3.1",
     "pdf-parse": "^1.1.1",
+    "sequelize": "^6.32.1",
+    "sqlite3": "^5.1.6",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.1",
     "typescript": "^4.9.4"

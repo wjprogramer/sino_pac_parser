@@ -7,3 +7,5 @@ output/**/*
 !output/.gitkeep
 .env
 yarn-error.log
+
+static/database/database.sqlite

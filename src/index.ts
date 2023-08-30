@@ -1,21 +1,19 @@
-import {initEnv} from "@src/env";
-import {getAllInputPdfFiles, getRepositoryPath, parsePdf} from "@src/utils";
+import {runParsePdf} from "@src/run_parse_pdf";
+import {runMainServer} from "@src/run_main_server";
 
-const main = async () => {
-  const env = initEnv();
-  const pdfFiles = getAllInputPdfFiles();
+const main = () => {
+  const appType = process.argv[2];
 
-  const options = {
-    password: env.PDF_PASSWORD
-  };
-
-  for (const pdfFile of pdfFiles) {
-    if (pdfFile.fileName != 'output_file.pdf') {
-      continue;
-    }
-    // TODO: 解密
-    await parsePdf(pdfFile, options);
+  switch (appType) {
+    case 'parse_pdf':
+      void runParsePdf();
+      break;
+    case 'main_server':
+      void runMainServer();
+      break;
+    default:
+      throw new Error('Please specify app type');
   }
 }
 
-void main();
+main();

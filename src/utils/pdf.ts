@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import {getInputFolderPath} from "@src/utils/fs";
-import {PdfFile, PdfPageData} from "@src/types";
+import {PdfFile} from "@src/types";
 import path from "path";
 import pdfParse from "pdf-parse";
 import {execSync} from "child_process";
-import {sleep} from "@src/utils/other";
+import {TradeRecord} from "@src/database/entities";
 
 export const getAllInputPdfFiles = (): PdfFile[] => {
     const inputFolderPath = getInputFolderPath();
@@ -13,31 +13,32 @@ export const getAllInputPdfFiles = (): PdfFile[] => {
         .filter((e) => e.endsWith('.pdf'))
         .map((fileName) => {
             return {
+                baseName: path.parse(fileName).name,
                 fileName: fileName,
                 completeAddress: path.join(inputFolderPath, fileName),
-                parent: inputFolderPath
+                parent: inputFolderPath,
             };
         });
 }
 
 export const decryptPdf = (options: {
-    filename: string,
+    fileName: string,
     password: string,
 }) => {
-    // TODO:
-    // qpdf --decrypt --password=A123456789 "./input/xxxxx.pdf" output/output_file.pdf
-    // execSync;
+    const baseFileName = path.parse(options.fileName).name;
+    const command = `qpdf --decrypt --password=${options.password} "./input/${options.fileName}" "./input/${baseFileName}.decrypt.pdf"`;
+    console.log(command);
+    execSync(command);
 }
 
-export const parsePdf = async (pdfFile: PdfFile, options?: {
-    password?: string,
-}) => {
-    const pageDataList: PdfPageData[] = [];
-
-    const rawBuffer = fs.readFileSync(pdfFile.completeAddress);
+export const parsePdf = async (pdfFile: PdfFile) => {
+    const decryptPath = path.join(
+        pdfFile.parent,
+        `${pdfFile.baseName}.decrypt.pdf`
+    );
+    const rawBuffer = fs.readFileSync(decryptPath);
     const parsePdfResult = await pdfParse(rawBuffer, {
         // pagerender: (pageData) => {
-        //     pageDataList.push(pageData);
         //     return pageData;
         // },
     });
@@ -46,13 +47,14 @@ export const parsePdf = async (pdfFile: PdfFile, options?: {
 
     let rawTextSnippets = parsePdfResult.text.split('\n');
 
-    const headerIndex = rawTextSnippets.findIndex((value, index, list) => {
+    const headerIndex = rawTextSnippets.findIndex((value, _index, _list) => {
         return value.includes('/fuck/幣別/fuck/存款種類/fuck/帳號/fuck/外幣餘額/fuck/臺幣餘額/fuck/透支/質借額度');
     });
 
     rawTextSnippets = rawTextSnippets.slice(headerIndex);
 
     const tradeRecordPattern = RegExp('^/fuck/2\\d{3}/\\d{2}/\\d{2}/fuck/');
+
     const tradeRecords = rawTextSnippets
         .filter((e) => tradeRecordPattern.test(e))
         .map((e) => e.split('/fuck/').slice(1))
@@ -66,12 +68,38 @@ export const parsePdf = async (pdfFile: PdfFile, options?: {
 
             return {
                 'date': e[0],
-                'type': e[1],
+                'tradeType': e[1],
                 'amount': amount,
                 'remain': Number(e[4].replace(',', '')),
                 'comment': e[5] + e[6],
             }
         });
+
+    let preDate = '';
+    let preOrderInDay = -1;
+
+    const now = new Date();
+
+    for (const tradeRecord of tradeRecords) {
+        if (preDate == tradeRecord.date) {
+            preOrderInDay++;
+        } else {
+            preDate = tradeRecord.date;
+            preOrderInDay = 0;
+        }
+
+        await TradeRecord.create({
+            date: Date.parse(tradeRecord.date),
+            tradeType: tradeRecord.tradeType,
+            orderInDay: preOrderInDay,
+            remain: tradeRecord.remain,
+            comment: tradeRecord.comment,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
+
+    await TradeRecord.sync({  });
 
     return tradeRecords;
 
