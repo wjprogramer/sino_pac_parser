@@ -5,6 +5,7 @@ export class TradeRecord extends Model {
     declare date: Date;
     declare tradeType: string;
     declare orderInDay: string;
+    declare amount: number;
     declare remain: number;
     declare comment: string;
     declare createdAt: Date;
@@ -25,6 +26,10 @@ export class TradeRecord extends Model {
             allowNull: false,
         },
         orderInDay: {
+            type: DataTypes.NUMBER,
+            allowNull: false,
+        },
+        amount: {
             type: DataTypes.NUMBER,
             allowNull: false,
         },

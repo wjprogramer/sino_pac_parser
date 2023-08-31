@@ -63,7 +63,7 @@ export const parsePdf = async (pdfFile: PdfFile) => {
             const outcome = e[2].replace(',', '');
             const income = e[3].replace(',', '');
 
-            const sign = outcome.length == 0 ? -1 : 1;
+            const sign = outcome.length == 0 ? 1 : -1;
             const amount = Number(outcome.length > 0 ? outcome : income) * sign;
 
             return {
@@ -71,7 +71,7 @@ export const parsePdf = async (pdfFile: PdfFile) => {
                 'tradeType': e[1],
                 'amount': amount,
                 'remain': Number(e[4].replace(',', '')),
-                'comment': e[5] + e[6],
+                'comment': (e[5] || '') + (e[6] || ''),
             }
         });
 
@@ -92,6 +92,7 @@ export const parsePdf = async (pdfFile: PdfFile) => {
             date: Date.parse(tradeRecord.date),
             tradeType: tradeRecord.tradeType,
             orderInDay: preOrderInDay,
+            amount: tradeRecord.amount,
             remain: tradeRecord.remain,
             comment: tradeRecord.comment,
             createdAt: now,
@@ -99,7 +100,7 @@ export const parsePdf = async (pdfFile: PdfFile) => {
         });
     }
 
-    await TradeRecord.sync({  });
+    // await TradeRecord.sync({  });
 
     return tradeRecords;
 

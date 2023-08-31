@@ -6,6 +6,7 @@
   "scripts": {
     "start:main_server": "ts-node -r tsconfig-paths/register src/index.ts main_server",
     "start:parse_pdf": "ts-node -r tsconfig-paths/register src/index.ts parse_pdf",
+    "start:report": "ts-node -r tsconfig-paths/register src/index.ts report",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
